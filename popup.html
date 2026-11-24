@@ -1,15 +1,14 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Job Tracker</title><link rel="stylesheet" href="style.css"></head><body>
-<header><h1>Job Tracker</h1><small>Local safety copy + Google Sheets sync</small></header>
-<div id="message" role="status"></div>
-<section><div class="buttons"><button id="dashboard" type="button">Dashboard / Sheet setup</button><button id="sync" type="button">Sync now</button></div><p id="syncInfo" class="hint"></p></section>
-<section><button id="capture" type="button">Capture current job page</button><p class="hint">Review fields, choose a status, then save. Capturing does not mean the application was submitted.</p>
-<label>Company<input id="company" placeholder="Company"></label>
-<label>Position<input id="position" placeholder="Job title"></label>
-<label>Location<input id="location" placeholder="City / Remote"></label>
-<label>Job link<input id="url" type="url" placeholder="https://..."></label>
-<label>Source<select id="source"><option value="LinkedIn">LinkedIn</option><option value="Job portal">Job portal</option><option value="Company career site">Company career site</option><option value="Indeed">Indeed</option><option value="Other portal">Other portal</option></select></label>
+<header><h1>Job Tracker</h1><small>Google Sheets is your job database</small></header><div id="message" role="status"></div>
+<section><button id="dashboard" type="button">Open Kanban dashboard / Settings</button><p class="hint">Jobs appear only after Google Sheets confirms saving. No manual sync.</p></section>
+<section><button id="capture" type="button">Capture job from this page</button><p class="hint">Verify captured fields. A click on Apply is not proof of submission.</p>
+<label>Company<input id="company" placeholder="Company"></label><label>Position<input id="position" placeholder="Job title"></label><label>Location<input id="location" placeholder="City / Remote"></label><label>Job URL<input id="url" type="url" placeholder="https://..."></label>
+<label>Source<select id="source"><option>LinkedIn</option><option>Job portal</option><option>Company career site</option><option>Indeed</option><option>Other portal</option></select></label>
 <label>Status<select id="status"><option>Bookmarked</option><option>Not Applied</option><option>Applied</option><option>Skipped</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></label>
-<label>Notes<textarea id="notes" rows="2" placeholder="Optional notes"></textarea></label>
-<button id="save" type="button">Save / update job</button></section>
-<section><h2>Jobs <span id="count"></span></h2><input id="search" placeholder="Search jobs"><div id="records"></div></section>
+<label>Application language<select id="language"><option value="">Unknown</option><option>English</option><option>German</option><option>Other</option></select></label>
+<div class="field-pair"><label>Salary from<input id="salaryFrom" placeholder="e.g. 55000" inputmode="decimal"></label><label>Salary to<input id="salaryTo" placeholder="e.g. 70000" inputmode="decimal"></label></div>
+<label>Currency<select id="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>Other</option></select></label>
+<label>Job description<textarea id="description" rows="5" placeholder="Extracted or paste full job description"></textarea></label><label>Notes<textarea id="notes" rows="2"></textarea></label>
+<button id="save" type="button">Save directly to Google Sheet</button></section>
+<section><h2>Recent jobs</h2><button id="refresh" type="button">Reload from Google Sheet</button><div id="records"></div></section>
 <script src="shared.js"></script><script src="popup.js"></script></body></html>
