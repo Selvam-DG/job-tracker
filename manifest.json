@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Local Job Tracker",
+  "version": "1.0.0",
+  "description": "Save job applications locally, with CSV and JSON backups.",
+  "permissions": ["storage", "activeTab", "scripting", "unlimitedStorage"],
+  "action": {"default_title": "Local Job Tracker", "default_popup": "popup.html"}
+}
