@@ -1,28 +1,38 @@
-# Job Tracker — v2.0.0 (Google Sheets)
+# Google Sheets Job Tracker — v3.0.0
 
-This is a private, unpacked Chrome Manifest V3 extension. It saves each record locally **first** and syncs to an existing Google Sheet through your own Apps Script deployment. The Google Sheet is the main readable tracker; local records are a retry queue and safety copy.
+This extension treats **Google Sheets as the primary database**, not Chrome local storage. The popup saves a job directly to your spreadsheet. The Kanban dashboard reads the spreadsheet every time you open it or click Reload. Changing a card's status updates the spreadsheet and appends to the status history.
 
-## Installation
-1. Extract the ZIP to a permanent folder. Open `chrome://extensions`, enable Developer mode and click **Load unpacked**. Select the folder containing `manifest.json`. If upgrading from v1, copy the new files over your previous unpacked folder and click **Reload** on that extension. Do not remove the old extension before checking whether its local data is preserved; installing a separate folder/extension may use a different extension ID and therefore different local data.
-2. Create or open **your existing Google Sheet** in your Google account. Do **not** rename existing tabs called `Applications` or `Status History` that have different headers; this setup only adds/updates tabs with its expected layout. It never wipes unrelated tabs.
-3. In that Sheet, select **Extensions → Apps Script**. Paste the full code from `GoogleSheetsAppsScript.gs` into `Code.gs` and save. This must be a **bound** script attached to the spreadsheet you want to update.
-4. In Apps Script, go to **Project Settings → Script Properties**, add `TRACKER_SECRET` with a random, private string at least 24 characters long. Use a password generator to make it. Do not put your Google password here.
-5. Select **Deploy → New deployment → Web app**. Select **Execute as: Me** and **Who has access: Anyone**. Authorize the script under your Google account, then copy the **Web app URL** ending in `/exec`. This setup allows anonymous requests but rejects requests without your private secret. Do not share either item. If your Workspace blocks public deployments, this route won't work; choose an OAuth-based alternative.
-6. Open the extension icon → **Dashboard / Sheet setup**. Paste (a) your existing Google Sheet URL, (b) web app URL, (c) exactly the same secret. Click **Save connection**.
-7. On a job page, click **Capture current job page**. Review fields, select Bookmarked/Not Applied/Applied/Skipped/Interview/Offer/Rejected, and save. Use the dashboard or popup dropdown to change a status. Watch the sync indicator. Click **Sync now** if needed.
+## Install or upgrade
 
-## How data is arranged
-- `Applications`: **one row per Job ID**, updated on later changes. Contains company, position, location, URL, source, current status, first bookmarked/applied timestamps, creation timestamp, latest status-change timestamp, latest record update timestamp, server sync timestamp, and notes. The current status column gets a dropdown list in Google Sheets.
-- `Status History`: **one row per unique status-change event**, with before/after status, client event timestamp, and receipt timestamp. Repeated network retries do not duplicate events.
-- The extension records **local ISO timestamps** (timezone offset determined by browser display) and writes ISO UTC strings into Sheets. The dashboard renders these in local time. Format timestamps in Sheets if you want different display styles.
-- `source`: LinkedIn, Job portal, Company career site, Indeed, Other portal.
+1. **Make a backup of your existing Google Sheet** (File → Make a copy).
+2. In the TARGET Google Sheet, open Extensions → Apps Script. Replace the previous `GoogleSheetsAppsScript.gs` code with the new version in this ZIP. Save.
+3. In Apps Script Project Settings → Script Properties, ensure `TRACKER_SECRET` contains a long random string (at least 24 characters). It must match the secret entered in the extension. Never share it.
+4. Deploy → Manage deployments → Edit (pencil) → **New version** → Deploy. Select **Execute as Me**, **Who has access: Anyone**. Keep the `/exec` web app URL. You may need to reauthorize. If using a new deployment, paste the new URL into Settings.
+5. Unzip this archive to a permanent folder. In Chrome `chrome://extensions` enable Developer Mode and choose **Load unpacked**, pointing to the folder containing `manifest.json`. For an upgrade, load v3 then disable v2 until verified. If you're replacing files in the SAME existing extension folder, click Reload in `chrome://extensions`.
+6. Open the extension's Kanban dashboard → **Google Sheet connection**. Paste the Google Sheet URL, deployed Apps Script `/exec` URL, and your secret. Click **Save settings + load sheet**.
+7. Open a job page, click extension → Capture → review → Save directly to Google Sheet. Refresh dashboard to see it.
 
-## Operational notes and limitations
-- The sheet URL is for connecting and opening the document; write access is provided by the Apps Script deployment, NOT the URL alone.
-- All new or edited records are written to `chrome.storage.local` before attempting sync, and a failed sync remains pending. They are retried on the next edit, when you click Sync, and periodically (about every five minutes while Chrome runs). A successful acknowledgment marks a record synced locally. Review the Pending counter; it is important to confirm actual cloud delivery.
-- To protect older records, **sync never replaces the whole spreadsheet**. It finds a row by stable UUID and updates that row or appends a new row. Old statuses are retained in `Status History`.
-- Do not directly edit the status dropdown in the Sheet if you want the extension and Sheet to agree: there is **no two-way sync** yet; use the dropdown in the extension or dashboard. Editing a cell directly may be overwritten by a later extension sync.
-- Captures details from page metadata/JobPosting structured data when possible; does not automatically establish that an application was actually submitted, and company portals vary in extraction quality.
-- Does not request Google account passwords, read job application form answers, or upload anything to any server other than your Apps Script endpoint. A public Apps Script deployment with a shared secret is a personal convenience mechanism, **not enterprise-grade OAuth authentication**. Keep the key private and rotate it if compromised. Deleting this Chrome extension can delete local records; the Sheet holds previously synchronized jobs.
-- The script creates/uses only two tabs. It will refuse to overwrite tabs with different header layouts.
-- If the Apps Script deployment changes, update the dashboard URL. Editing Apps Script code requires publishing a new deployment version.
+## Tabs and date format
+
+`Applications`: one row per job, unique Job ID; Company; Position; Location; URL; Source; Status; Created Date; Created Time; Last Changed Date; Last Changed Time; Language; Salary From/To/Currency; Job Description; Notes; internal ISO timestamps.
+
+`Status History`: a separate row each time a job is CREATED or changes status, with Previous Status, New Status, Changed Date, Changed Time (HH:mm), source, URL, and event ID. Timestamps are formatted using **your Google spreadsheet time zone** (File → Settings). Created date/time are preserved when updating a job through v3.
+
+**Important**: Editing `Applications!Status` directly in Google Sheets is reflected in the Kanban dashboard after Reload, but does **not** append history. To preserve history, change statuses using the Kanban dropdown in the extension.
+
+## Data durability
+
+After the server confirms each Save, the job lives in Google Sheets. Clearing Chrome extension storage does not remove previously saved Sheet records, but **does erase saved web app URL and secret**, which you must re-enter to reconnect. Offline saves are **not queued** in v3; a failed save remains unsaved. Keep the popup open until you see confirmation. Do not delete the old v2 extension until you have imported and verified any local pending jobs.
+
+## Import records from v2
+
+If installing v3 **over the same extension ID** with existing `job:*` records in Chrome local storage, use Dashboard → Google Sheet connection → **Import old locally saved jobs**. It retains the old Chrome records. If you install as a different extension, Chrome isolates their storage, so this import cannot read v2's data. Do not uninstall the older extension before migrating. Older dates from v2 are not recreated by this importer; imported items receive a fresh created date/time and initial status history entry. Preserve your old Sheet or exports for historical dates.
+
+**Legacy sheet compatibility**: v3 adds new header columns to an existing `Applications` tab rather than deleting rows. Older rows with existing Job IDs can be loaded. Existing Created At ISO fields may remain populated but Created Date/Time for old records may be blank until you edit them. Keep a backup before deploying.
+
+## Caveats
+
+- Automated capture uses JobPosting JSON-LD metadata and page content, so some job descriptions, salaries, languages, and locations need manual review; it is NOT automatic application confirmation.
+- Apps Script web app access is `Anyone` with a shared secret in the POST body; treat the secret and deployment URL as sensitive. This is appropriate for a personal prototype, but a production system should use stronger Google OAuth authorization.
+- Job descriptions are truncated for spreadsheet cell limits.
+- Web app requests require network availability. Google Apps Script quotas apply.

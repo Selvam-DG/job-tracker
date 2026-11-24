@@ -2,6 +2,16 @@
 
 All notable changes are organized by release. Each release describes the source code associated with its Git tag, not later planned features.
 
+## [3.0.0]
+
+### Added / Changed
+- Make Google Sheets the primary source of truth and read jobs back into the extension.
+- Add Kanban dashboard with status changes sent directly to Sheets.
+- Store Created Date/Time and Last Changed Date/Time (24-hour HH:mm).
+- Add application language, salary range/currency and job description.
+- Record initial status and later status transitions in `Status History`.
+- Offer import of existing local v2 records when installed under the same extension ID.
+
 ## [2.0.0]
 
 ### Added / Changed

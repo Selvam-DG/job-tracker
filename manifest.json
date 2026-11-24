@@ -1,11 +1,8 @@
 {
-  "manifest_version": 3,
-  "name": "Local Job Tracker — Google Sheets",
-  "version": "2.0.0",
-  "description": "Capture jobs and sync status history to your own Google Sheet; retain unsynced jobs locally.",
-  "permissions": ["storage", "activeTab", "scripting", "alarms", "unlimitedStorage"],
-  "host_permissions": ["https://script.google.com/*", "https://script.googleusercontent.com/*"],
-  "background": {"service_worker": "background.js"},
-  "options_page": "dashboard.html",
-  "action": {"default_title": "Job Tracker", "default_popup": "popup.html"}
+ "manifest_version":3,"name":"Job Tracker — Google Sheets Kanban","version":"3.0.0",
+ "description":"Save and read applications directly from your own Google Sheet; Kanban status board and history.",
+ "permissions":["storage","activeTab","scripting"],
+ "host_permissions":["https://script.google.com/*","https://script.googleusercontent.com/*"],
+ "background":{"service_worker":"background.js"},
+ "options_page":"dashboard.html","action":{"default_title":"Job Tracker","default_popup":"popup.html"}
 }
