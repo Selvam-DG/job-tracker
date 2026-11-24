@@ -2,6 +2,15 @@
 
 All notable changes are organized by release. Each release describes the source code associated with its Git tag, not later planned features.
 
+## [3.1.0]
+
+### Added / Changed
+- Add JobBoard logo and Chrome toolbar icons.
+- Add recent jobs (5 or 10), status and text filters, and collapsible section to popup.
+- Add dashboard text, status and Created/Changed date-range filters.
+- Show 10 recent cards per Kanban column initially, with Show 10 more controls.
+- Add GitHub-ready documentation and `.gitignore`.
+
 ## [3.0.0]
 
 ### Added / Changed

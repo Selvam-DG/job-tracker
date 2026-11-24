@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Job Tracker</title><link rel="stylesheet" href="style.css"></head><body>
-<header><h1>Job Tracker</h1><small>Google Sheets is your job database</small></header><div id="message" role="status"></div>
+<header><div class="brand"><img src="icons/icon48.png" width="32" height="32" alt="JobBoard icon"><h1>JobBoard</h1></div><small>Google Sheets is your job database</small></header><div id="message" role="status"></div>
 <section><button id="dashboard" type="button">Open Kanban dashboard / Settings</button><p class="hint">Jobs appear only after Google Sheets confirms saving. No manual sync.</p></section>
 <section><button id="capture" type="button">Capture job from this page</button><p class="hint">Verify captured fields. A click on Apply is not proof of submission.</p>
 <label>Company<input id="company" placeholder="Company"></label><label>Position<input id="position" placeholder="Job title"></label><label>Location<input id="location" placeholder="City / Remote"></label><label>Job URL<input id="url" type="url" placeholder="https://..."></label>
@@ -10,5 +10,5 @@
 <label>Currency<select id="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>Other</option></select></label>
 <label>Job description<textarea id="description" rows="5" placeholder="Extracted or paste full job description"></textarea></label><label>Notes<textarea id="notes" rows="2"></textarea></label>
 <button id="save" type="button">Save directly to Google Sheet</button></section>
-<section><h2>Recent jobs</h2><button id="refresh" type="button">Reload from Google Sheet</button><div id="records"></div></section>
+<section><details id="recentSection" open><summary><strong>Recent jobs</strong> <span class="muted">(from Google Sheets)</span></summary><div class="recent-controls"><label>Show<select id="recentLimit"><option value="5">5 jobs</option><option value="10">10 jobs</option></select></label><label>Status<select id="recentStatus"><option value="">All</option></select></label></div><label>Find<input id="recentSearch" placeholder="Company or role"></label><div class="buttons"><button id="refresh" type="button">Reload jobs</button></div><div id="records"></div><p id="recentCount" class="hint"></p></details></section>
 <script src="shared.js"></script><script src="popup.js"></script></body></html>

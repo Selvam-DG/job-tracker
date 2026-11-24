@@ -1,4 +1,4 @@
-# Google Sheets Job Tracker — v3.0.0
+# JobBoard — Google Sheets Job Tracker v3.1.0
 
 This extension treats **Google Sheets as the primary database**, not Chrome local storage. The popup saves a job directly to your spreadsheet. The Kanban dashboard reads the spreadsheet every time you open it or click Reload. Changing a card's status updates the spreadsheet and appends to the status history.
 
@@ -36,3 +36,10 @@ If installing v3 **over the same extension ID** with existing `job:*` records in
 - Apps Script web app access is `Anyone` with a shared secret in the POST body; treat the secret and deployment URL as sensitive. This is appropriate for a personal prototype, but a production system should use stronger Google OAuth authorization.
 - Job descriptions are truncated for spreadsheet cell limits.
 - Web app requests require network availability. Google Apps Script quotas apply.
+
+## Version 3.1: navigating more applications
+- The **Chrome popup** displays your most recent 5 jobs, with an option for 10, plus status and text filters. Collapse **Recent jobs** with the section arrow. It fetches the list directly from the sheet.
+- The **Kanban dashboard** has status, text, and date-range filters. Choose whether the date range means **Created Date** or **Last Changed Date**. Each status column initially shows 10 cards; click **Show 10 more** to expand it.
+- These controls limit what appears on screen; the current implementation still retrieves **all** rows from Google Sheets per load. For thousands of jobs, plan server-side pagination and caching.
+- Original vector source is `icons/logo.svg`; Chrome uses the generated PNG icon files.
+
