@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local Job Tracker</title><link rel="stylesheet" href="style.css"></head><body>
+<header><h1>Local Job Tracker</h1><small>Stored in this Chrome profile on this laptop</small></header>
+<div id="message" role="status"></div>
+<section><button id="capture" type="button">Capture current job page</button><p class="hint">Review the details, then select Save. This does not claim you applied automatically.</p>
+<label>Company<input id="company" autocomplete="organization" placeholder="Company"></label>
+<label>Position<input id="position" placeholder="Job title"></label>
+<label>Location<input id="location" placeholder="City / remote"></label>
+<label>Job link<input id="url" type="url" placeholder="https://..."></label>
+<label>Source<input id="source" placeholder="LinkedIn / career site"></label>
+<label>Status<select id="status"><option>Saved</option><option selected>Applied</option><option>Interviewing</option><option>Offer</option><option>Rejected</option><option>Withdrawn</option></select></label>
+<label>Application date<input id="date" type="date"></label>
+<label>Notes<textarea id="notes" rows="2" placeholder="Optional notes"></textarea></label>
+<button id="save" type="button">Save application</button></section>
+<section><h2>Applications <span id="count"></span></h2><input id="search" placeholder="Search applications"><div id="records"></div></section>
+<section><h2>Back up and restore</h2><div class="buttons"><button id="csv" type="button">Export CSV</button><button id="json" type="button">Export JSON</button></div><label>Import JSON backup or CSV export<input id="import" type="file" accept=".json,.csv,application/json,text/csv"></label><p class="hint">Import merges by ID or job URL; it does not wipe existing jobs. Keep a backup outside Chrome.</p></section>
+<script src="popup.js"></script></body></html>
