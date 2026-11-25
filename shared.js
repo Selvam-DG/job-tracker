@@ -13,3 +13,8 @@ async function listJobs(){return(await request('list')).jobs||[]}
 async function saveJob(data,existingId){const records=await listJobs(),url=normalizeUrl(data.url);const prior=(existingId&&records.find(j=>j.id===existingId))||(url&&records.find(j=>normalizeUrl(j.url)===url));const record={...prior,...data,id:prior?.id||crypto.randomUUID(),url};const result=await request('save',{record});return {record,result,matched:!!prior};}
 async function setStatus(job,status){return request('status',{id:job.id,status})}
 const descriptionPreview=s=>(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,8000);
+
+// Contact records belong to one Job ID; Google Sheets remains the source of truth.
+async function listContacts(jobId){const data=await request('listContacts',jobId?{jobId}:{});return data.contacts||[];}
+async function saveContact(contact){return request('saveContact',{contact});}
+async function deleteContact(id,jobId){return request('deleteContact',{id,jobId});}

@@ -2,6 +2,15 @@
 
 All notable changes are organized by release. Each release describes the source code associated with its Git tag, not later planned features.
 
+## [3.2.0] — Contact Management (feature branch; not merged)
+### Added
+- Separate Contacts sheet with Job ID relation and multiple contacts per job.
+- Contact fields and create/edit/delete from the Kanban job details panel.
+- Contact creation/update timestamps (separate date and HH:mm time).
+- Optional contact capture and saving in the Chrome popup.
+- Conservative visible recruiter email and profile detection for job pages.
+### Preserved
+- Job capture, Google Sheets as source of truth, Kanban status controls, history, recent jobs, search and date filters.
 ## [3.1.0]
 
 ### Added / Changed

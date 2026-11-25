@@ -2,7 +2,7 @@
  * Project Settings > Script Properties: TRACKER_SECRET (24+ chars).
  * Deploy as Web app / execute as Me / access Anyone. Keep secret private.
  */
-const JOBS_TAB='Applications', EVENTS_TAB='Status History';
+const JOBS_TAB='Applications', EVENTS_TAB='Status History', CONTACTS_TAB='Contacts';
 const STATUSES=['Bookmarked','Not Applied','Applied','Skipped','Interview','Offer','Rejected'];
 const JOB_HEADERS=['Job ID','Company','Position','Location','Job URL','Source','Status','Created Date','Created Time','Last Changed Date','Last Changed Time','Language','Salary From','Salary To','Salary Currency','Job Description','Notes','Created At ISO','Updated At ISO'];
 const EVENT_HEADERS=['Event ID','Job ID','Company','Position','Previous Status','New Status','Changed Date','Changed Time','Changed At ISO','Source','Job URL'];
@@ -12,6 +12,9 @@ function doPost(e){try{
  if(body.action==='list')return reply_({ok:true,jobs:listJobs_()});
  if(body.action==='save')return reply_(saveJob_(body.record||{}));
  if(body.action==='status')return reply_(changeStatus_(body.id,body.status));
+ if(body.action==='listContacts')return reply_({ok:true,contacts:listContacts_(body.jobId)});
+ if(body.action==='saveContact')return reply_(saveContact_(body.contact||{}));
+ if(body.action==='deleteContact')return reply_(deleteContact_(body.id,body.jobId));
  throw Error('Unknown action');
  }catch(err){return reply_({ok:false,error:String(err.message||err)})}}
 function doGet(){return reply_({ok:true,service:'Job Tracker v3',note:'Use authenticated POST requests'});}
@@ -47,3 +50,16 @@ function saveJob_(r){if(!validId_(r.id))throw Error('Invalid job id');if(!r.comp
 function changeStatus_(id,status){if(!validId_(id)||!STATUSES.includes(status))throw Error('Invalid job or status');const jobs=listJobs_(),record=jobs.find(x=>x.id===id);if(!record)throw Error('Job not found');if(record.status===status)return {ok:true,id,action:'unchanged'};return saveJob_({...record,status});}
 /** Optional: view configuration health without printing the secret. */
 function testConfiguration(){const s=PropertiesService.getScriptProperties().getProperty('TRACKER_SECRET');console.log(JSON.stringify({secretConfigured:!!s,secretLengthValid:!!s&&s.length>=24,spreadsheetAccessible:!!SpreadsheetApp.getActiveSpreadsheet()}));}
+
+
+/** Contacts: one or more professional contacts per existing job. No scraping on the server. */
+const CONTACT_HEADERS=['Contact ID','Job ID','Name','Contact Type','Role','Department','Email','Phone','LinkedIn URL','Source','Language','Notes','Created Date','Created Time','Updated Date','Updated Time','Created At ISO','Updated At ISO'];
+function contactRow_(r){return {id:r['Contact ID'],jobId:r['Job ID'],name:r.Name||'',type:r['Contact Type']||'',role:r.Role||'',department:r.Department||'',email:r.Email||'',phone:r.Phone||'',linkedin:r['LinkedIn URL']||'',source:r.Source||'',language:r.Language||'',notes:r.Notes||'',createdDate:r['Created Date']||'',createdTime:r['Created Time']||'',updatedDate:r['Updated Date']||'',updatedTime:r['Updated Time']||'',createdAt:r['Created At ISO']||'',updatedAt:r['Updated At ISO']||''};}
+function listContacts_(jobId){if(jobId&& !validId_(jobId))throw Error('Invalid job ID');const t=tab_(CONTACTS_TAB,CONTACT_HEADERS);return rows_(t).filter(r=>validId_(r['Contact ID'])&&validId_(r['Job ID'])&&(!jobId||r['Job ID']===jobId)).map(contactRow_);}
+function saveContact_(c){if(!validId_(c.jobId))throw Error('Invalid parent Job ID');if(!c.name&&!c.email)throw Error('Contact needs a name or email');if(c.email&& !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c.email)))throw Error('Invalid email');for(const key of ['linkedin'])if(c[key]&&!/^https:\/\//i.test(String(c[key])))throw Error('LinkedIn URL must be HTTPS');
+ const lock=LockService.getScriptLock();lock.waitLock(25000);try{if(!find_(tab_(JOBS_TAB,JOB_HEADERS),c.jobId))throw Error('Parent job not found in Applications');
+ const t=tab_(CONTACTS_TAB,CONTACT_HEADERS),old=c.id?rows_(t).find(x=>x['Contact ID']===c.id):null;if(c.id&&!validId_(c.id))throw Error('Invalid contact ID');if(old&&old['Job ID']!==c.jobId)throw Error('Contact belongs to a different job');const id=old?old['Contact ID']:(c.id||Utilities.getUuid()),now=new Date(),parts=localParts_(now);
+ const record={'Contact ID':id,'Job ID':c.jobId,'Name':c.name,'Contact Type':c.type,'Role':c.role,'Department':c.department,'Email':c.email,'Phone':c.phone,'LinkedIn URL':c.linkedin,'Source':c.source,'Language':c.language,'Notes':c.notes,'Created Date':old?old['Created Date']:parts[0],'Created Time':old?old['Created Time']:parts[1],'Updated Date':parts[0],'Updated Time':parts[1],'Created At ISO':old?old['Created At ISO']:now.toISOString(),'Updated At ISO':now.toISOString()};
+ const prior=old?t.sh.getRange(old._row,1,1,t.headers.length).getValues()[0]:t.headers.map(()=>'');const row=t.headers.map((h,i)=>Object.prototype.hasOwnProperty.call(record,h)?safe_(record[h],h==='Notes'?20000:5000):prior[i]);if(old)t.sh.getRange(old._row,1,1,row.length).setValues([row]);else t.sh.appendRow(row);SpreadsheetApp.flush();return {ok:true,id,action:old?'updated':'created'};
+ }finally{lock.releaseLock();}}
+function deleteContact_(id,jobId){if(!validId_(id)||!validId_(jobId))throw Error('Invalid contact or job ID');const lock=LockService.getScriptLock();lock.waitLock(25000);try{const t=tab_(CONTACTS_TAB,CONTACT_HEADERS),r=rows_(t).find(x=>x['Contact ID']===id&&x['Job ID']===jobId);if(!r)throw Error('Contact not found for this job');t.sh.deleteRow(r._row);return {ok:true,id,deleted:true};}finally{lock.releaseLock();}}
