@@ -9,6 +9,15 @@
 <div class="field-pair"><label>Salary from<input id="salaryFrom" placeholder="e.g. 55000" inputmode="decimal"></label><label>Salary to<input id="salaryTo" placeholder="e.g. 70000" inputmode="decimal"></label></div>
 <label>Currency<select id="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>Other</option></select></label>
 <label>Job description<textarea id="description" rows="5" placeholder="Extracted or paste full job description"></textarea></label><label>Notes<textarea id="notes" rows="2"></textarea></label>
-<button id="save" type="button">Save directly to Google Sheet</button></section>
+<details id="popupContact"><summary><strong>Recruiter / HR contact (optional)</strong></summary><p class="hint">Review extracted public contact details. Contact is saved and linked after the job saves successfully.</p>
+<label>Contact name<input id="pContactName" placeholder="Ansprechpartner/in"></label>
+<label>Contact type<select id="pContactType"><option>Recruiter</option><option>HR</option><option>Hiring Manager</option><option>Other</option></select></label>
+<label>Role<input id="pContactRole"></label><label>Department<input id="pContactDepartment"></label>
+<label>Email<input id="pContactEmail" type="email"></label><label>Phone<input id="pContactPhone" type="tel"></label>
+<label>LinkedIn profile<input id="pContactLinkedin" type="url" placeholder="https://www.linkedin.com/in/..."></label>
+<label>Source<select id="pContactSource"><option>Job posting</option><option>LinkedIn</option><option>Company portal</option><option>Email</option><option>Other</option></select></label>
+<label>Language<select id="pContactLanguage"><option value="">Unknown</option><option>German</option><option>English</option><option>Other</option></select></label>
+<label>Notes<textarea id="pContactNotes" rows="2"></textarea></label></details>
+<button id="save" type="button">Save job and optional contact to Google Sheet</button></section>
 <section><details id="recentSection" open><summary><strong>Recent jobs</strong> <span class="muted">(from Google Sheets)</span></summary><div class="recent-controls"><label>Show<select id="recentLimit"><option value="5">5 jobs</option><option value="10">10 jobs</option></select></label><label>Status<select id="recentStatus"><option value="">All</option></select></label></div><label>Find<input id="recentSearch" placeholder="Company or role"></label><div class="buttons"><button id="refresh" type="button">Reload jobs</button></div><div id="records"></div><p id="recentCount" class="hint"></p></details></section>
 <script src="shared.js"></script><script src="popup.js"></script></body></html>

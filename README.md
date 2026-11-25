@@ -1,45 +1,40 @@
-# JobBoard — Google Sheets Job Tracker v3.1.0
+# JobBoard v3.2.0 — Contact Management (feature branch)
 
-This extension treats **Google Sheets as the primary database**, not Chrome local storage. The popup saves a job directly to your spreadsheet. The Kanban dashboard reads the spreadsheet every time you open it or click Reload. Changing a card's status updates the spreadsheet and appends to the status history.
+This **feature-branch release** builds on v3.1.0. All existing job tracking, filters, and Kanban views remain.
 
-## Install or upgrade
+## What's new
 
-1. **Make a backup of your existing Google Sheet** (File → Make a copy).
-2. In the TARGET Google Sheet, open Extensions → Apps Script. Replace the previous `GoogleSheetsAppsScript.gs` code with the new version in this ZIP. Save.
-3. In Apps Script Project Settings → Script Properties, ensure `TRACKER_SECRET` contains a long random string (at least 24 characters). It must match the secret entered in the extension. Never share it.
-4. Deploy → Manage deployments → Edit (pencil) → **New version** → Deploy. Select **Execute as Me**, **Who has access: Anyone**. Keep the `/exec` web app URL. You may need to reauthorize. If using a new deployment, paste the new URL into Settings.
-5. Unzip this archive to a permanent folder. In Chrome `chrome://extensions` enable Developer Mode and choose **Load unpacked**, pointing to the folder containing `manifest.json`. For an upgrade, load v3 then disable v2 until verified. If you're replacing files in the SAME existing extension folder, click Reload in `chrome://extensions`.
-6. Open the extension's Kanban dashboard → **Google Sheet connection**. Paste the Google Sheet URL, deployed Apps Script `/exec` URL, and your secret. Click **Save settings + load sheet**.
-7. Open a job page, click extension → Capture → review → Save directly to Google Sheet. Refresh dashboard to see it.
+- Separate **Contacts** tab in your existing Google Sheet, linked using immutable **Job ID**. One job can have multiple contacts.
+- Contact fields: name, type (Recruiter / HR / Hiring Manager / Other), role, department, work email, phone, LinkedIn URL, source, language, and notes.
+- Created date/time and updated date/time for each contact (spreadsheet timezone, 24-hour HH:mm). Original creation timestamp preserved on edits.
+- Kanban: **View details** → Contacts → add/edit/delete contacts.
+- Popup: optional recruiter contact fields next to job capture; tries to extract only visible `mailto:` contact and visible LinkedIn profile. **Review before saving.**
+- Saving a job can also save an optional contact. If a contact fails to save, the popup reports the partial failure; never assumes both succeeded.
 
-## Tabs and date format
+## Install / upgrade from v3.1.0
 
-`Applications`: one row per job, unique Job ID; Company; Position; Location; URL; Source; Status; Created Date; Created Time; Last Changed Date; Last Changed Time; Language; Salary From/To/Currency; Job Description; Notes; internal ISO timestamps.
+1. **Back up your Google Sheet**, including Applications and Status History.
+2. Open your existing bound Apps Script via **Extensions → Apps Script**. Replace the existing `GoogleSheetsAppsScript.gs` code with this version (preserve `TRACKER_SECRET` under Script Properties).
+3. **Deploy → Manage deployments → Edit → New version → Deploy**. Reuse the `/exec` URL for that deployment. Keep Execute as Me and access settings configured for your use. Do not share your secret.
+4. Extract this folder. For local testing use **chrome://extensions → Developer mode → Load unpacked** (or reload an existing unpacked installation using the same folder). Configure Google Sheet settings in Dashboard if necessary.
+5. Open a job card → View details → Add a contact; inspect the new **Contacts** sheet.
 
-`Status History`: a separate row each time a job is CREATED or changes status, with Previous Status, New Status, Changed Date, Changed Time (HH:mm), source, URL, and event ID. Timestamps are formatted using **your Google spreadsheet time zone** (File → Settings). Created date/time are preserved when updating a job through v3.
+### Data model
 
-**Important**: Editing `Applications!Status` directly in Google Sheets is reflected in the Kanban dashboard after Reload, but does **not** append history. To preserve history, change statuses using the Kanban dropdown in the extension.
+`Applications` continues to own job records. `Contacts` stores one row per person with `Contact ID` and `Job ID`. The backend verifies that the parent job exists before writing a contact. **Status History** remains unchanged.
 
-## Data durability
+Only job records are displayed in the Kanban board; contacts are shown when a job is selected. Contact data is read directly from Sheets on selection. Clearing Chrome extension storage does not delete contact rows already saved in Sheets. It does delete local connection settings.
 
-After the server confirms each Save, the job lives in Google Sheets. Clearing Chrome extension storage does not remove previously saved Sheet records, but **does erase saved web app URL and secret**, which you must re-enter to reconnect. Offline saves are **not queued** in v3; a failed save remains unsaved. Keep the popup open until you see confirmation. Do not delete the old v2 extension until you have imported and verified any local pending jobs.
+### Privacy & security
 
-## Import records from v2
+Only collect relevant professional details that you are authorized to use. The popup does not use hidden LinkedIn data and never sends contact data to any service other than your configured Apps Script endpoint. The existing shared-secret Apps Script design is intended for personal/controlled testing; **do not publish it as a multi-user Chrome Web Store release without redesigning authorization (for example, individual Google OAuth access).**
 
-If installing v3 **over the same extension ID** with existing `job:*` records in Chrome local storage, use Dashboard → Google Sheet connection → **Import old locally saved jobs**. It retains the old Chrome records. If you install as a different extension, Chrome isolates their storage, so this import cannot read v2's data. Do not uninstall the older extension before migrating. Older dates from v2 are not recreated by this importer; imported items receive a fresh created date/time and initial status history entry. Preserve your old Sheet or exports for historical dates.
+### Limitations
 
-**Legacy sheet compatibility**: v3 adds new header columns to an existing `Applications` tab rather than deleting rows. Older rows with existing Job IDs can be loaded. Existing Created At ISO fields may remain populated but Created Date/Time for old records may be blank until you edit them. Keep a backup before deploying.
+- Contact detection is best-effort and typically only finds visible mailto/LinkedIn links; most websites need manual entry.
+- Editing contacts directly in Sheets bypasses validation and contact timestamp logic.
+- Saving the job and optional contact uses two requests, not one atomic transaction. If the contact write fails, retry from the Kanban contacts editor after inspecting the sheet.
+- Deleting a contact removes its row permanently; back up the sheet first.
+- Live browser / Google account end-to-end testing remains necessary.
 
-## Caveats
-
-- Automated capture uses JobPosting JSON-LD metadata and page content, so some job descriptions, salaries, languages, and locations need manual review; it is NOT automatic application confirmation.
-- Apps Script web app access is `Anyone` with a shared secret in the POST body; treat the secret and deployment URL as sensitive. This is appropriate for a personal prototype, but a production system should use stronger Google OAuth authorization.
-- Job descriptions are truncated for spreadsheet cell limits.
-- Web app requests require network availability. Google Apps Script quotas apply.
-
-## Version 3.1: navigating more applications
-- The **Chrome popup** displays your most recent 5 jobs, with an option for 10, plus status and text filters. Collapse **Recent jobs** with the section arrow. It fetches the list directly from the sheet.
-- The **Kanban dashboard** has status, text, and date-range filters. Choose whether the date range means **Created Date** or **Last Changed Date**. Each status column initially shows 10 cards; click **Show 10 more** to expand it.
-- These controls limit what appears on screen; the current implementation still retrieves **all** rows from Google Sheets per load. For thousands of jobs, plan server-side pagination and caching.
-- Original vector source is `icons/logo.svg`; Chrome uses the generated PNG icon files.
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "JobBoard \u2014 Sheets Job Tracker",
-  "version": "3.1.0",
-  "description": "Save jobs in Google Sheets and manage recent applications in a filtered Kanban board.",
+  "name": "JobBoard — Sheets Job Tracker",
+  "version": "3.2.0",
+  "description": "Capture jobs and professional recruiter contacts in Google Sheets, linked by Job ID, with a Kanban dashboard.",
   "permissions": [
     "storage",
     "activeTab",
